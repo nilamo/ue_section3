@@ -22,7 +22,7 @@ void UOpenDoor::BeginPlay()
 
 	AActor* Owner = GetOwner();
 	FRotator Rotation = Owner->GetActorRotation();
-	FRotator NewRotation = Rotation.Add(0, -75, 0);
+	FRotator NewRotation = Rotation.Add(0, -1 * OpenAngle, 0);
 	Owner->SetActorRotation(NewRotation);
 }
 
