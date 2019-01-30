@@ -2,6 +2,7 @@
 
 #include "Grabber.h"
 #include "Engine/World.h"
+#include "GameFramework/Actor.h"
 #include "GameFramework/PlayerController.h"
 #include "DrawDebugHelpers.h"
 
@@ -22,8 +23,46 @@ UGrabber::UGrabber()
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
+	if (PhysicsHandle)
+	{
+
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("'%s' must have a PhysicsHandle component"), *GetOwner()->GetName());
+	}
+
+	if (InputComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Input Component found"));
+		InputComponent->BindAction(
+			TEXT("Grab"),
+			EInputEvent::IE_Pressed,
+			this,
+			&UGrabber::TriggerGrabPressed
+		);
+
+		InputComponent->BindAction(
+			TEXT("Grab"),
+			EInputEvent::IE_Released,
+			this,
+			&UGrabber::TriggerGrabReleased
+		);
+	}
 }
 
+void UGrabber::TriggerGrabPressed()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Key pressed"));
+}
+
+void UGrabber::TriggerGrabReleased()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Key released"));
+}
 
 // Called every frame
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -33,18 +72,31 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	FVector Location;
 	FRotator Rotation;
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT Location, OUT Rotation);
-	
+
+	FVector TraceEnd = Location + (Reach * Rotation.Vector());
 	DrawDebugLine(
 		GetWorld(),
 		Location,
-		Location + (Reach * Rotation.Vector()),
+		TraceEnd,
 		FColor(100, 100, 0),
 		false,
 		0,
 		0,
 		10
 	);
-	//UE_LOG(LogTemp, Warning, TEXT("Location: %s, Rotation: %s"), *Location.ToString(), *Rotation.ToString());
 
+	FHitResult Collision;
+	bool Hit = GetWorld()->LineTraceSingleByObjectType(
+		OUT Collision,
+		Location,
+		TraceEnd,
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
+		FCollisionQueryParams(TEXT(""), false, GetOwner())
+	);
+
+	if (Hit)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *Collision.GetActor()->GetName());
+		//UE_LOG(LogTemp, Warning, TEXT("Location: %s, Rotation: %s"), *Location.ToString(), *Rotation.ToString());
+	}
 }
-

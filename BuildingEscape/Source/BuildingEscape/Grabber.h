@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Components/InputComponent.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Grabber.generated.h"
 
 
@@ -28,4 +30,10 @@ private:
 	// how far the grabber reaches out
 	UPROPERTY(EditAnywhere)
 		float Reach = 100;
+
+	UPhysicsHandleComponent* PhysicsHandle = nullptr;
+	UInputComponent* InputComponent = nullptr;
+
+	void TriggerGrabPressed();
+	void TriggerGrabReleased();
 };
