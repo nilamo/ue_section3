@@ -36,4 +36,7 @@ private:
 
 	void TriggerGrabPressed();
 	void TriggerGrabReleased();
+	void InitHandlesAndEventHandlers();
+
+	void RaycastLine(FVector &, FVector &) const;
 };
