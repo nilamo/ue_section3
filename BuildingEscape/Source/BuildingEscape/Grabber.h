@@ -38,5 +38,5 @@ private:
 	void TriggerGrabReleased();
 	void InitHandlesAndEventHandlers();
 
-	void RaycastLine(FVector &, FVector &) const;
+	FTwoVectors RaycastLine() const;
 };

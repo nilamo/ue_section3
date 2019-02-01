@@ -38,23 +38,12 @@ void UGrabber::InitHandlesAndEventHandlers()
 
 	if (InputComponent)
 	{
-		InputComponent->BindAction(
-			TEXT("Grab"),
-			EInputEvent::IE_Pressed,
-			this,
-			&UGrabber::TriggerGrabPressed
-		);
-
-		InputComponent->BindAction(
-			TEXT("Grab"),
-			EInputEvent::IE_Released,
-			this,
-			&UGrabber::TriggerGrabReleased
-		);
+		InputComponent->BindAction(TEXT("Grab"), EInputEvent::IE_Pressed, this, &UGrabber::TriggerGrabPressed);
+		InputComponent->BindAction(TEXT("Grab"), EInputEvent::IE_Released, this, &UGrabber::TriggerGrabReleased);
 	}
 }
 
-void UGrabber::RaycastLine(FVector &StartPoint, FVector &EndPoint) const
+FTwoVectors UGrabber::RaycastLine() const
 {
 	FVector Location;
 	FRotator Rotation;
@@ -62,8 +51,7 @@ void UGrabber::RaycastLine(FVector &StartPoint, FVector &EndPoint) const
 
 	FVector TraceEnd = Location + (Reach * Rotation.Vector());
 
-	StartPoint = Location;
-	EndPoint = TraceEnd;
+	return FTwoVectors(Location, TraceEnd);
 }
 
 void UGrabber::TriggerGrabPressed()
@@ -72,13 +60,13 @@ void UGrabber::TriggerGrabPressed()
 	{
 		FVector Location;
 		FVector TraceEnd;
-		RaycastLine(OUT Location, OUT TraceEnd);
+		FTwoVectors Ray = RaycastLine();
 
 		FHitResult Collision;
 		bool Hit = GetWorld()->LineTraceSingleByObjectType(
 			OUT Collision,
-			Location,
-			TraceEnd,
+			Ray.v1,
+			Ray.v2,
 			FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 			FCollisionQueryParams(TEXT(""), false, GetOwner())
 		);
@@ -109,9 +97,7 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 	if (PhysicsHandle&&PhysicsHandle->GetGrabbedComponent())
 	{
-		FVector LineStart;
-		FVector LineEnd;
-		RaycastLine(OUT LineStart, OUT LineEnd);
-		PhysicsHandle->SetTargetLocation(LineEnd);
+		FTwoVectors Ray = RaycastLine();
+		PhysicsHandle->SetTargetLocation(Ray.v2);
 	}
 }
