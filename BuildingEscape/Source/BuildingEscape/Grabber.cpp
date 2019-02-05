@@ -77,6 +77,7 @@ void UGrabber::TriggerGrabPressed()
 			PhysicsHandle->GrabComponentAtLocation(Collision.GetComponent(), TEXT(""), Collision.GetActor()->GetActorLocation());
 		}
 	}
+
 	UE_LOG(LogTemp, Warning, TEXT("Key pressed"));
 }
 
